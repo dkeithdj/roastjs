@@ -70,7 +70,7 @@ def ChatInput():
 @app.route("/")
 def get():
     page = Body(
-        H1("Chatbot Demo"),
+        H1("Roast JS 🔥", cls="text-center text-3xl font-bold mt-4 mb-2"),
         Div(
             *[ChatMessage(msg) for msg in messages],
             id="chatlist",
@@ -91,11 +91,14 @@ def get():
 # Handle the form submission
 @app.post("/")
 def post(msg: str):
+    print(msg)
     messages.append({"role": "user", "content": msg})
-    response = model.generate_content("Write a story about an AI and magic")
+    response = model.generate_content(
+        "You are a witty assistant asked to create a light-hearted roast. ell me a roast about javascript, make it comedic. 2 sentences. be a bit harsh"
+    )
     print(response.text)
     # r = cli(messages, sp=sp)  # get response from chat model
-    # messages.append({"role": "assistant", "content": contents(r)})
+    messages.append({"role": "assistant", "content": response.text})
     return (
         ChatMessage(messages[-2]),  # The user's message
         ChatMessage(messages[-1]),  # The chatbot's response
