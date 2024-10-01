@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="/assets/favicon.png"
+  <img src="/assets/favicon.png"/>
 </div>
 
 # Roast JS
