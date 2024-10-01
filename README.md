@@ -1,4 +1,6 @@
-![Roast JS](./assets/favicon.png)
+<div align="center">
+  <img src="/assets/favicon.png"
+</div>
 
 # Roast JS
 
