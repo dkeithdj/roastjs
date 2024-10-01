@@ -5,7 +5,7 @@ hdrs = (picolink)
 app = FastHTML(hdrs=hdrs)
 
 
-@app.get("/")
+@app.route("/")
 def get():
     return (
         Socials(
@@ -41,4 +41,3 @@ def get():
 
 
 serve()
-
