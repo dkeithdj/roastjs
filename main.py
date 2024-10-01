@@ -92,21 +92,21 @@ def get():
     return Title("Chatbot Demo"), page
 
 # Handle the form submission
-@app.route("/")
-def post(msg: str):
-    print(msg)
-    messages.append({"role": "user", "content": msg})
-    response = model.generate_content(
-        "You are a witty assistant asked to create a light-hearted roast. tell me a roast about javascript, make it comedic. 2 sentences. be a bit harsh"
-    )
-    print(response.text)
-    # r = cli(messages, sp=sp)  # get response from chat model
-    messages.append({"role": "assistant", "content": response.text})
-    return (
-        # ChatMessage(messages[-2]),  # The user's message
-        ChatMessage(messages[-1]),  # The chatbot's response
-        # ChatInput(),
-    )  # And clear the input field via an OOB swap
+# @app.route("/")
+# def post(msg: str):
+#     print(msg)
+#     messages.append({"role": "user", "content": msg})
+#     response = model.generate_content(
+#         "You are a witty assistant asked to create a light-hearted roast. tell me a roast about javascript, make it comedic. 2 sentences. be a bit harsh"
+#     )
+#     print(response.text)
+#     # r = cli(messages, sp=sp)  # get response from chat model
+#     messages.append({"role": "assistant", "content": response.text})
+#     return (
+#         # ChatMessage(messages[-2]),  # The user's message
+#         ChatMessage(messages[-1]),  # The chatbot's response
+#         # ChatInput(),
+#     )  # And clear the input field via an OOB swap
 
 serve()
 
