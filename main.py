@@ -1,9 +1,11 @@
 from fasthtml.common import *
 
-app, rt = fast_app(hdrs=(picolink))
+hdrs = (picolink)
+
+app = FastHTML(hdrs=hdrs)
 
 
-@rt("/")
+@app.get("/")
 def get():
     return (
         Socials(
@@ -39,3 +41,4 @@ def get():
 
 
 serve()
+
