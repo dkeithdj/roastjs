@@ -1,29 +1,29 @@
 import os
+from datetime import datetime, timedelta
 
 import google.generativeai as genai
-
-# from claudette import Client, models, contents
-import uvicorn
 from dotenv import load_dotenv
 from fasthtml.common import (
     H1,
+    A,
     Body,
     Button,
+    Container,
     Div,
     FastHTML,
     Form,
-    Group,
-    Input,
+    Grid,
     Link,
+    Nav,
+    P,
     Script,
     Title,
+    add_toast,
     picolink,
     serve,
-    Container,
-    Socials,
-    Card,
-    P, A, Titled
+    setup_toasts,
 )
+from lucide_fasthtml import Lucide
 
 load_dotenv()
 
@@ -39,76 +39,156 @@ dlink = Link(
 )
 app = FastHTML(hdrs=(tlink, dlink, picolink))
 
+setup_toasts(app)
+
 # Set up a chat model (https://claudette.answer.ai/)
 # cli = Client(models[0])
 sp = """You are a helpful and concise assistant."""
-messages = []
+rate_limit_duration = timedelta(seconds=5)
+last_message_time = None  # Track when the last message was sent
 
 
-# Chat message component (renders a chat bubble)
 def ChatMessage(msg):
-    bubble_class = (
-        "chat-bubble-primary" if msg["role"] == "user" else "chat-bubble-secondary"
-    )
-    chat_class = "chat-end" if msg["role"] == "user" else "chat-start"
     return Div(
-        Div(msg["role"], cls="chat-header"),
-        Div(msg["content"], cls=f"chat-bubble {bubble_class}"),
-        cls=f"chat {chat_class}",
+        Div(
+            P(msg, id="chat-message", cls="text-primary-content"),
+            Div(
+                Button(
+                    "Copy",
+                    cls="btn",
+                    hx_on_click='navigator.clipboard.writeText(document.querySelector("#chat-message").innerText).then(() => alert("Copied to clipboard!"), (e) => console.error(e))',
+                ),
+                cls="card-actions justify-end",
+            ),
+            cls="card-body",
+        ),
+        cls="card bg-primary shadow-xl",
     )
 
 
 # The input field for the user message. Also used to clear the
 # input field after sending a message via an OOB swap
-def ChatInput():
-    return Input(
-        type="text",
+def ChatButton():
+    return Button(
+        "Roast it!",
+        type="submit",
         name="msg",
         id="msg-input",
-        placeholder="Type a message",
-        cls="input input-bordered w-full",
+        cls="btn btn-primary",
         hx_swap_oob="true",
     )
+
+
+def Footer():
+    return Container(
+        Div(
+            # Navigation Links
+            Nav(
+                Grid(
+                    A(
+                        "denreikeith.me",
+                        href="https://denreikeith.me",
+                        target="_blank",
+                        cls="link link-hover",
+                    ),
+                    cls="grid-flow-col gap-4",
+                )
+            ),
+            # Social Media Icons
+            Nav(
+                A(
+                    Lucide("github", cls="fill-current"),
+                    href="https://github.com/dkeithdj/roastjs",
+                    target="_blank",
+                ),
+                A(
+                    Lucide("linkedin", cls="fill-current"),
+                    href="https://www.linkedin.com/in/denreikeith/",
+                    target="_blank",
+                ),
+                A(
+                    Lucide("twitter", cls="fill-current"),
+                    href="https://www.x.com/_denreikeith/",
+                    target="_blank",
+                ),
+                cls="flex",
+            ),
+            # Copyright Notice
+            Div(
+                P(
+                    f"Copyright © {datetime.now().year} - All rights reserved by denreikeith."
+                )
+            ),
+            cls="footer footer-center bg-base-200 text-base-content rounded p-10",
+        )
+    )
+
 
 # The main screen
 @app.route("/")
 def get():
     page = Body(
         H1("Roast JS 🔥", cls="text-center text-3xl font-bold mt-4 mb-2"),
+        H1("100% JS-less, 100% Python", cls="text-center italic"),
         Div(
-            *[ChatMessage(msg) for msg in messages],
-            id="chatlist",
-            cls="chat-box h-[73vh] overflow-y-auto",
+            "Made with ",
+            A(
+                "FastHTML",
+                href="https://fastht.ml",
+                target="_blank",
+                cls="link link-hover mt-4",
+            ),
+            cls="text-center text-sm mt-2 mb-2",
         ),
+        Div(id="chatlist", cls=""),
         Form(
-            Group(ChatInput(), Button("Send", cls="btn btn-primary")),
-            hx_post="/",
+            ChatButton(),
+            hx_post="/post",
             hx_target="#chatlist",
-            hx_swap="beforeend",
             cls="flex space-x-2 mt-2",
         ),
+        Footer(),
         cls="p-4 max-w-lg mx-auto",
     )
+
     return Title("Chatbot Demo"), page
 
+
 # Handle the form submission
-@app.route("/")
-def post(msg: str):
-    print(msg)
-    messages.append({"role": "user", "content": msg})
-    response = model.generate_content(
-        "You are a witty assistant asked to create a light-hearted roast. tell me a roast about javascript, make it comedic. 2 sentences. be a bit harsh"
+@app.route("/post")
+def post(session):
+    global last_message_time
+    now = datetime.now()
+
+    # Check rate limit
+    if last_message_time and now - last_message_time < rate_limit_duration:
+        Div(
+            add_toast(
+                session,
+                "Rate limit exceeded. Please wait before sending another message.",
+                "error",
+            )
+        )
+        return Div(
+            hx_out="outerHTML",
+        )
+
+    last_message_time = now  # Update last message time
+
+    try:
+        response = model.generate_content(
+            "You are a witty assistant asked to create a light-hearted roast. tell me a roast about javascript, make it comedic. 2 sentences. be a bit harsh, make it unique"
+        )
+
+        if not response.text:
+            return Div(
+                add_toast(session, "An error occurred. Please try again later.", "warn")
+            )
+        return (ChatMessage(response.text),)  # The chatbot's response
+    except Exception as e:
+        return Div(
+            add_toast(session, "An error occurred. Please try again later.", "error")
     )
-    print(response.text)
-    # r = cli(messages, sp=sp)  # get response from chat model
-    messages.append({"role": "assistant", "content": response.text})
-    return (
-        # ChatMessage(messages[-2]),  # The user's message
-        ChatMessage(messages[-1]),  # The chatbot's response
-        # ChatInput(),
-    )  # And clear the input field via an OOB swap
+
 
 serve()
-
-# if __name__ == "__main__":
-#     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
