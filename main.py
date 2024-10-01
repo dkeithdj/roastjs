@@ -40,7 +40,7 @@ dlink = Link(
     rel="stylesheet",
     href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css",
 )
-favicon = Link(rel="icon", href="favicon.png")
+favicon = Link(rel="icon", href="assets/favicon.png")
 
 app = FastHTML(hdrs=(tlink, dlink, picolink, favicon))
 
