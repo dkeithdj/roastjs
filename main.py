@@ -22,6 +22,7 @@ from fasthtml.common import (
     picolink,
     serve,
     setup_toasts,
+    FileResponse
 )
 from lucide_fasthtml import Lucide
 
@@ -37,7 +38,9 @@ dlink = Link(
     rel="stylesheet",
     href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css",
 )
-app = FastHTML(hdrs=(tlink, dlink, picolink))
+favicon = Link(rel="icon", type="image/x-icon", href="favicon.ico")
+
+app = FastHTML(hdrs=(tlink, dlink, picolink, favicon))
 
 setup_toasts(app)
 
@@ -123,6 +126,8 @@ def Footer():
         )
     )
 
+@app.route("/{fname:path}.{ext:static}")
+def get(fname:str, ext:str): return FileResponse(f'{fname}.{ext}')
 
 # The main screen
 @app.route("/")
@@ -151,7 +156,7 @@ def get():
         cls="p-4 max-w-lg mx-auto",
     )
 
-    return Title("Chatbot Demo"), page
+    return Title("RoastJS"), page
 
 
 # Handle the form submission
