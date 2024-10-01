@@ -18,6 +18,7 @@ from fasthtml.common import (
     Script,
     Title,
     picolink,
+    serve,
 )
 
 load_dotenv()
@@ -105,6 +106,6 @@ def post(msg: str):
         # ChatInput(),
     )  # And clear the input field via an OOB swap
 
-
-if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+serve()
+# if __name__ == "__main__":
+#     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
