@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 
+import requests 
 import google.generativeai as genai
 from dotenv import load_dotenv
 from fasthtml.common import (
@@ -18,6 +19,7 @@ from fasthtml.common import (
     P,
     Script,
     Title,
+    URLPath,
     add_toast,
     picolink,
     serve,
@@ -38,7 +40,7 @@ dlink = Link(
     rel="stylesheet",
     href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css",
 )
-favicon = Link(rel="icon", type="image/x-icon", href="favicon.ico")
+favicon = Link(rel="icon", href="favicon.png")
 
 app = FastHTML(hdrs=(tlink, dlink, picolink, favicon))
 
@@ -49,7 +51,6 @@ setup_toasts(app)
 sp = """You are a helpful and concise assistant."""
 rate_limit_duration = timedelta(seconds=5)
 last_message_time = None  # Track when the last message was sent
-
 
 def ChatMessage(msg):
     return Div(
